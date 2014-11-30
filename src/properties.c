@@ -77,6 +77,8 @@ Atom prop_circscroll = 0;
 Atom prop_circscroll_dist = 0;
 Atom prop_circscroll_trigger = 0;
 Atom prop_circpad = 0;
+Atom prop_swipeaction = 0;
+Atom prop_swipethreshold = 0;
 Atom prop_palm = 0;
 Atom prop_palm_dim = 0;
 Atom prop_coastspeed = 0;
@@ -314,6 +316,14 @@ InitDeviceProperties(InputInfoPtr pInfo)
     prop_circpad =
         InitAtom(pInfo->dev, SYNAPTICS_PROP_CIRCULAR_PAD, 8, 1,
                  &para->circular_pad);
+
+    memcpy(values, para->swipe_action, MAX_SWIPE * sizeof(int));
+    prop_swipeaction =
+        InitAtom(pInfo->dev, SYNAPTICS_PROP_SWIPE_ACTION, 8, MAX_SWIPE, values);
+    prop_swipethreshold =
+        InitAtom(pInfo->dev, SYNAPTICS_PROP_SWIPE_THRESHOLD, 32, 1,
+                 &para->swipe_threshold);
+
     prop_palm =
         InitAtom(pInfo->dev, SYNAPTICS_PROP_PALM_DETECT, 8, 1,
                  &para->palm_detect);
@@ -688,6 +698,25 @@ SetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
             return BadMatch;
 
         para->circular_pad = *(BOOL *) prop->data;
+    }
+    else if (property == prop_swipeaction) {
+        int i;
+        CARD8 *action;
+
+        if (prop->size > MAX_SWIPE || prop->format != 8 ||
+            prop->type != XA_INTEGER)
+            return BadMatch;
+
+        action = (CARD8 *) prop->data;
+
+        for (i = 0; i < MAX_SWIPE; i++)
+            para->swipe_action[i] = action[i];
+    }
+    else if (property == prop_swipethreshold) {
+        if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
+            return BadMatch;
+
+        para->swipe_threshold = *(INT32 *) prop->data;
     }
     else if (property == prop_palm) {
         if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)

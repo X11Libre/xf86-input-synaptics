@@ -398,6 +398,17 @@ Left/Right/Top/BottomEdge parameters.
 For circular touchpads.
 Property: "Synaptics Circular Pad"
 .TP
+.BI "Option \*qSwipeLeftButton\*q \*q" integer \*q
+Which mouse button is reported on a three-finger swipe to the left. Property:
+"Synaptics Swipe Action"
+.TP
+.BI "Option \*qSwipeRightButton\*q \*q" integer \*q
+Which mouse button is reported on a three-finger swipe to the right. Property:
+"Synaptics Swipe Action"
+.TP
+.BI "Option \*qSwipeThreshold\*q \*q" integer \*q
+Threshold for triggering swipe event. Property: "Synaptics Swipe Threshold"
+.TP
 .BI "Option \*qPalmDetect\*q \*q" boolean \*q
 If palm detection should be enabled.
 .

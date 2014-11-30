@@ -75,6 +75,11 @@ enum ClickFingerEvent {
     MAX_CLICK
 };
 
+enum SwipeEvent {
+    LEFT_SWIPE = 0,             /* Swipe to the left, three fingers */
+    RIGHT_SWIPE,                /* Swipe to the right, three fingers */
+    MAX_SWIPE
+};
 
 typedef struct _SynapticsMoveHist {
     int x, y;
@@ -197,6 +202,8 @@ typedef struct _SynapticsParameters {
     int locked_drag_time;       /* timeout for locked drags */
     int tap_action[MAX_TAP];    /* Button to report on tap events */
     int click_action[MAX_CLICK];        /* Button to report on click with fingers */
+    int swipe_action[MAX_SWIPE];        /* Button to report on swipe action */
+    int swipe_threshold;        /* Threshold for swipe event */
     Bool circular_scrolling;    /* Enable circular scrolling */
     double scroll_dist_circ;    /* Scrolling angle radians */
     int circular_trigger;       /* Trigger area for circular scrolling */
@@ -254,6 +261,14 @@ struct _SynapticsPrivateRec {
         double coast_delta_y;   /* Accumulated vertical coast delta */
         int packets_this_scroll;        /* Events received for this scroll */
     } scroll;
+    struct {
+        int last_x;             /* last x-swipe position */
+        int last_y;             /* last y-swipe position */
+        double delta_x;         /* accumulated horiz swipe delta */
+        double delta_y;         /* accumulated vert swipe delta */
+        Bool posted;            /* indicate that event was posted */
+        Bool threefinger_on;    /* swipe event with three fingers */
+    } swipe;
     int count_packet_finger;    /* packet counter with finger on the touchpad */
     int button_delay_millis;    /* button delay for 3rd button emulation */
     Bool prev_up;               /* Previous up button value, for double click emulation */
