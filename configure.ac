@@ -62,6 +62,7 @@ PKG_CHECK_MODULES(XORG, [inputproto >= 2.1.99.3] [xorg-server >= 1.18] xproto in
 
 # X Server SDK location is required to install Synaptics header files
 # This location is also relayed in the xorg-synaptics.pc file
+PKG_PROG_PKG_CONFIG([0.25])
 sdkdir=`$PKG_CONFIG --variable=sdkdir xorg-server`
 AC_SUBST([sdkdir])
 
@@ -71,9 +72,9 @@ AC_SUBST([sdkdir])
 # Define a configure option for an alternate input module directory
 AC_ARG_WITH(xorg-module-dir,
             AS_HELP_STRING([--with-xorg-module-dir=DIR],
-                           [Default xorg module directory [[default=$libdir/xorg/modules]]]),
+                           [Default xorg module directory]),
             [moduledir="$withval"],
-            [moduledir="$libdir/xorg/modules"])
+            [moduledir=`$PKG_CONFIG --variable=moduledir xorg-server`])
 inputdir=${moduledir}/input
 AC_SUBST(inputdir)
 
