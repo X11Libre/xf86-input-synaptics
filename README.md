@@ -1,5 +1,5 @@
-Synaptics touchpad driver for X.Org
------------------------------------
+Synaptics touchpad driver for XLibre
+------------------------------------
 
 FAQ
 ---
@@ -30,10 +30,10 @@ FAQ
     them manually if they don't exist already. (Look at
     /proc/bus/input/devices to figure out how many nodes you need.)
 
-	     # mknod /dev/input/event0 c 13 64
-	     # mknod /dev/input/event1 c 13 65
-	     # mknod /dev/input/event2 c 13 66
-	     ...
+         # mknod /dev/input/event0 c 13 64
+         # mknod /dev/input/event1 c 13 65
+         # mknod /dev/input/event2 c 13 66
+         ...
 
 * How can I configure tap-to-click behavior?
 
@@ -67,11 +67,11 @@ FAQ
     Probably because some X startup/login script uses xmodmap to remap
     the mouse buttons. Correct settings for the touchpad are:
 
-	xmodmap -e 'pointer = 1 2 3 4 5 6 7'
+        xmodmap -e 'pointer = 1 2 3 4 5 6 7'
 
     You can check the current settings by running:
 
-	xmodmap -pp
+        xmodmap -pp
 
 * Horizontal scrolling doesn't work in some programs. Is it a driver
   bug?
@@ -122,23 +122,12 @@ Authors
 Many people have contributed to this driver. Look at the top of
 synaptics.c and ps2comm.c for details.
 
-The current maintainer is X.org development team <xorg-devel@lists.x.org>.
-
 
 Contacts
 --------
-All questions regarding this software should be directed at the
-Xorg mailing list:
-
-  https://lists.x.org/mailman/listinfo/xorg
 
 The primary development code repository can be found at:
 
-  https://gitlab.freedesktop.org/xorg/driver/xf86-input-synaptics
+  https://github.com/X11Libre/xf86-input-synaptics
 
 Please submit bug reports and requests to merge patches there.
-
-For patch submission instructions, see:
-
-  https://www.x.org/wiki/Development/Documentation/SubmittingPatches
-
