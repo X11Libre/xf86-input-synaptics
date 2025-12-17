@@ -33,10 +33,7 @@
  *      Fred Hucht (fred@thp.Uni-Duisburg.de)
  *      Arne Schwabe <schwabe@uni-paderborn.de>
  */
-
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <xorg-server.h>
 #include <unistd.h>

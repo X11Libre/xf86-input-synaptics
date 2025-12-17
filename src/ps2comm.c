@@ -31,10 +31,7 @@
  *      Linuxcare Inc. David Kennedy (dkennedy@linuxcare.com)
  *      Fred Hucht (fred@thp.Uni-Duisburg.de)
  */
-
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <xorg-server.h>
 #include "synproto.h"

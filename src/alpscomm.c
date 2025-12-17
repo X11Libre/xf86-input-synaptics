@@ -27,10 +27,7 @@
  *      Neil Brown (neilb@cse.unsw.edu.au)
  *      Peter Osterlund (petero2@telia.com)
  */
-
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <xorg-server.h>
 #include "synproto.h"
