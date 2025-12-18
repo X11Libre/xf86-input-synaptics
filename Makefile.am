@@ -27,9 +27,6 @@ DISTCHECK_CONFIGURE_FLAGS = --with-sdkdir='$${includedir}/xorg' \
 SUBDIRS = include src man tools conf
 MAINTAINERCLEANFILES = ChangeLog INSTALL
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = xorg-synaptics.pc
-
 .PHONY: ChangeLog INSTALL
 
 INSTALL:

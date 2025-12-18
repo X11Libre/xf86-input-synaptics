@@ -170,6 +170,5 @@ AC_CONFIG_FILES([Makefile
                 tools/Makefile
                 conf/Makefile
                 include/Makefile
-                xorg-synaptics.pc])
+               ])
 AC_OUTPUT
-
