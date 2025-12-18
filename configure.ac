@@ -23,7 +23,7 @@
 # Initialize Autoconf
 AC_PREREQ([2.60])
 AC_INIT([xlibre-xf86-input-synaptics],
-        [1.10.0],
+        [25.0.0],
         [https://github.com/X11Libre/xf86-input-synaptics/issues],
         [xlibre-xf86-input-synaptics])
 AC_CONFIG_SRCDIR([Makefile.am])
