@@ -175,8 +175,8 @@ static XF86ModuleVersionInfo VersionRec = {
     {0, 0, 0, 0}
 };
 
-static pointer
-SetupProc(pointer module, pointer options, int *errmaj, int *errmin)
+static void*
+SetupProc(void *module, void *options, int *errmaj, int *errmin)
 {
     xf86AddInputDriver(&SYNAPTICS, module, 0);
     return module;
@@ -349,7 +349,7 @@ calculate_tap_hysteresis(SynapticsPrivate * priv, int range,
  * the log message.
  */
 static int
-set_percent_option(pointer options, const char *optname,
+set_percent_option(void *options, const char *optname,
                    const int range, const int offset, const int default_value)
 {
     int result;
@@ -543,7 +543,7 @@ static void
 set_default_parameters(InputInfoPtr pInfo)
 {
     SynapticsPrivate *priv = pInfo->private;    /* read-only */
-    pointer opts = pInfo->options;      /* read-only */
+    void *opts = pInfo->options;      /* read-only */
     SynapticsParameters *pars = &priv->synpara; /* modified */
 
     int horizScrollDelta, vertScrollDelta;      /* pixels */
@@ -1583,7 +1583,7 @@ current_button_area(SynapticsParameters * para, int x, int y)
 }
 
 static CARD32
-timerFunc(OsTimerPtr timer, CARD32 now, pointer arg)
+timerFunc(OsTimerPtr timer, CARD32 now, void *arg)
 {
     InputInfoPtr pInfo = arg;
     SynapticsPrivate *priv = (SynapticsPrivate *) (pInfo->private);
