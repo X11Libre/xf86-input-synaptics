@@ -101,7 +101,7 @@ InitTypedAtom(DeviceIntPtr dev, const char *name, Atom type, int format,
     uint8_t val_8[9];           /* we never have more than 9 values in an atom */
     uint16_t val_16[9];
     uint32_t val_32[9];
-    pointer converted;
+    void *converted;
 
     for (int i = 0; i < nvalues; i++) {
         switch (format) {
@@ -392,7 +392,7 @@ InitDeviceProperties(InputInfoPtr pInfo)
             MakeAtom(XI_PROP_DEVICE_NODE, strlen(XI_PROP_DEVICE_NODE), TRUE);
         XIChangeDeviceProperty(pInfo->dev, prop_device_node, XA_STRING, 8,
                                PropModeReplace, strlen(priv->device),
-                               (pointer) priv->device, FALSE);
+                               (void*) priv->device, FALSE);
         XISetDevicePropertyDeletable(pInfo->dev, prop_device_node, FALSE);
     }
 
