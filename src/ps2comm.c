@@ -381,6 +381,8 @@ PS2QueryHardware(InputInfoPtr pInfo)
 
     if (!priv->proto_data)
         priv->proto_data = calloc(1, sizeof(struct PS2SynapticsHwInfo));
+    if (!priv->proto_data)
+        return FALSE;
     synhw = (struct PS2SynapticsHwInfo *) priv->proto_data;
 
     /* is the synaptics touchpad active? */

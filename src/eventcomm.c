@@ -955,6 +955,8 @@ EventReadDevDimensions(InputInfoPtr pInfo)
 
     proto_data = EventProtoDataAlloc(pInfo->fd);
     priv->proto_data = proto_data;
+    if (!proto_data)
+        return;
 
     for (int i = 0; i < ABS_MT_CNT; i++)
         proto_data->axis_map[i] = -1;
