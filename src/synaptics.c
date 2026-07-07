@@ -1346,6 +1346,8 @@ DeviceInit(DeviceIntPtr dev)
         goto fail;
 
     priv->comm.hwState = SynapticsHwStateAlloc(priv);
+    if (!priv->comm.hwState)
+        goto fail;
 
     InitDeviceProperties(pInfo);
     XIRegisterPropertyHandler(pInfo->dev, SetProperty, NULL, NULL);
@@ -1355,9 +1357,11 @@ DeviceInit(DeviceIntPtr dev)
     return Success;
 
  fail:
-    free(priv->local_hw_state);
-    free(priv->hwState);
+    SynapticsHwStateFree(&priv->comm.hwState);
+    SynapticsHwStateFree(&priv->local_hw_state);
+    SynapticsHwStateFree(&priv->hwState);
     free(priv->open_slots);
+    priv->open_slots = NULL;
     return !Success;
 }
 
