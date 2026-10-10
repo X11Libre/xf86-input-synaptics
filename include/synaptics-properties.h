@@ -104,6 +104,13 @@
  * element. order: Finger 1, 2, 3 */
 #define SYNAPTICS_PROP_CLICK_ACTION "Synaptics Click Action"
 
+/* 8 bit, up to MAX_SWIPE values (see synaptics.h), 0 disables an
+ * element. order: Left, Right */
+#define SYNAPTICS_PROP_SWIPE_ACTION "Synaptics Swipe Action"
+
+/* 32 bit */
+#define SYNAPTICS_PROP_SWIPE_THRESHOLD "Synaptics Swipe Threshold"
+
 /* 8 bit (BOOL) */
 #define SYNAPTICS_PROP_CIRCULAR_SCROLLING "Synaptics Circular Scrolling"
 

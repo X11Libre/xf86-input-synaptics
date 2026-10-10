@@ -561,6 +561,7 @@ set_default_parameters(InputInfoPtr pInfo)
     Bool vertTwoFingerScroll, horizTwoFingerScroll;
     int horizResolution = 1;
     int vertResolution = 1;
+    int swipeThreshold;
     int width, height, diag, range;
     int horizHyst, vertHyst;
     int middle_button_timeout;
@@ -628,6 +629,9 @@ set_default_parameters(InputInfoPtr pInfo)
     /* Enable twofinger scroll if we can detect doubletap */
     vertTwoFingerScroll = priv->has_double ? TRUE : FALSE;
     horizTwoFingerScroll = FALSE;
+
+    /* Calculate the minimal required swipe distance */
+    swipeThreshold = width * 0.15;
 
     /* Use resolution reported by hardware if available */
     if ((priv->resx > 0) && (priv->resy > 0)) {
@@ -722,6 +726,12 @@ set_default_parameters(InputInfoPtr pInfo)
         xf86SetBoolOption(opts, "CircularScrolling", FALSE);
     pars->circular_trigger = xf86SetIntOption(opts, "CircScrollTrigger", 0);
     pars->circular_pad = xf86SetBoolOption(opts, "CircularPad", FALSE);
+    pars->swipe_action[LEFT_SWIPE] =
+        xf86SetIntOption(opts, "SwipeLeftButton", 0);
+    pars->swipe_action[RIGHT_SWIPE] =
+        xf86SetIntOption(opts, "SwipeRightButton", 0);
+    pars->swipe_threshold =
+        xf86SetIntOption(opts, "SwipeThreshold", swipeThreshold);
     pars->palm_detect = xf86SetBoolOption(opts, "PalmDetect", FALSE);
     pars->palm_min_width = xf86SetIntOption(opts, "PalmMinWidth", palmMinWidth);
     pars->palm_min_z = xf86SetIntOption(opts, "PalmMinZ", palmMinZ);
@@ -1958,8 +1968,9 @@ HandleTapProcessing(SynapticsPrivate * priv, struct SynapticsHwState *hw,
     release = finger == FS_UNTOUCHED && priv->finger_state >= FS_TOUCHED;
     move = (finger >= FS_TOUCHED &&
             (priv->tap_max_fingers <=
-             ((priv->horiz_scroll_twofinger_on ||
-               priv->vert_scroll_twofinger_on) ? 2 : 1)) &&
+             (priv->swipe.threefinger_on ? 3 :
+              ((priv->horiz_scroll_twofinger_on ||
+                priv->vert_scroll_twofinger_on) ? 2 : 1))) &&
             (priv->prevFingers == hw->numFingers &&
              ((abs(hw->x - priv->touch_on.x) >= para->tap_move) ||
               (abs(hw->y - priv->touch_on.y) >= para->tap_move))));
@@ -2615,6 +2626,33 @@ HandleScrolling(SynapticsPrivate * priv, struct SynapticsHwState *hw,
     return delay;
 }
 
+static void
+HandleSwipe(SynapticsPrivate *priv, struct SynapticsHwState *hw, Bool finger)
+{
+    SynapticsParameters *para = &priv->synpara;
+
+    /* Not enough fingers touched, clear swipe tracking. */
+    if (!finger || hw->numFingers < 3) {
+        priv->swipe.threefinger_on = FALSE;
+        priv->swipe.posted = FALSE;
+        return;
+    }
+
+    if (priv->swipe.threefinger_on) {
+        /* Swipe was activated, accumulate delta. */
+        priv->swipe.delta_x += hw->x - priv->swipe.last_x;
+        priv->swipe.delta_y += hw->y - priv->swipe.last_y;
+    }
+    else {
+        priv->swipe.threefinger_on = hw->numFingers == 3;
+        priv->swipe.delta_x = 0;
+        priv->swipe.delta_y = 0;
+    }
+
+    priv->swipe.last_x = hw->x;
+    priv->swipe.last_y = hw->y;
+}
+
 /**
  * Check if any 2+ fingers are close enough together to assume this is a
  * ClickFinger action.
@@ -2919,6 +2957,30 @@ repeat_scrollbuttons(const InputInfoPtr pInfo,
     return delay;
 }
 
+static void
+post_swipe_events(const InputInfoPtr pInfo)
+{
+    SynapticsPrivate *priv = (SynapticsPrivate *) (pInfo->private);
+    SynapticsParameters *para = &priv->synpara;
+
+    /* There is no need to go any further if those conditions are not met. */
+    if (!priv->swipe.threefinger_on || priv->swipe.posted)
+        return;
+
+    if (para->swipe_action[LEFT_SWIPE] &&
+        priv->swipe.delta_x < -para->swipe_threshold) {
+        post_button_click(pInfo, para->swipe_action[LEFT_SWIPE]);
+        priv->swipe.posted = TRUE;
+        priv->swipe.delta_x = 0;
+    }
+    else if (para->swipe_action[RIGHT_SWIPE] &&
+        priv->swipe.delta_x > para->swipe_threshold) {
+        post_button_click(pInfo, para->swipe_action[RIGHT_SWIPE]);
+        priv->swipe.posted = TRUE;
+        priv->swipe.delta_x = 0;
+    }
+}
+
 /* Update the open slots and number of active touches */
 static void
 UpdateTouchState(InputInfoPtr pInfo, struct SynapticsHwState *hw)
@@ -3093,6 +3155,8 @@ HandleState(InputInfoPtr pInfo, struct SynapticsHwState *hw, CARD32 now,
         if (timeleft > 0)
             delay = MIN(delay, timeleft);
 
+        HandleSwipe(priv, hw, (finger >= FS_TOUCHED));
+
         /*
          * Compensate for unequal x/y resolution. This needs to be done after
          * calculations that require unadjusted coordinates, for example edge
@@ -3147,6 +3211,10 @@ HandleState(InputInfoPtr pInfo, struct SynapticsHwState *hw, CARD32 now,
         post_scroll_events(pInfo);
         priv->scroll.last_millis = hw->millis;
     }
+
+    /* Process swipe events only in the active area. */
+    if (inside_active_area)
+        post_swipe_events(pInfo);
 
     if (double_click) {
         post_button_click(pInfo, 1);
