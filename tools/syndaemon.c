@@ -651,7 +651,10 @@ main(int argc, char *argv[])
 
         /* Child (daemon) is running here */
         setsid();               /* Become session leader */
-        chdir("/");             /* In case the file system gets unmounted */
+        if (chdir("/") < 0) {   /* In case the file system gets unmounted */
+            perror("chdir");
+            exit(3);
+        }
         umask(0);               /* We don't want any surprises */
         if (pid_file) {
             FILE *fd = fopen(pid_file, "w");
