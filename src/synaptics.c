@@ -328,7 +328,7 @@ calculate_edge_widths(SynapticsPrivate * priv, int *l, int *r, int *t, int *b)
 }
 
 static void
-calculate_tap_hysteresis(SynapticsPrivate * priv, int range,
+calculate_tap_hysteresis(SynapticsPrivate * priv, int span,
                          int *fingerLow, int *fingerHigh)
 {
     switch (priv->model) {
@@ -345,8 +345,8 @@ calculate_tap_hysteresis(SynapticsPrivate * priv, int range,
         *fingerHigh = 75;
         break;
     default:
-        *fingerLow = priv->minp + range * (25.0 / 256);
-        *fingerHigh = priv->minp + range * (30.0 / 256);
+        *fingerLow = priv->minp + span * (25.0 / 256);
+        *fingerHigh = priv->minp + span * (30.0 / 256);
         break;
     }
 }
@@ -359,14 +359,14 @@ calculate_tap_hysteresis(SynapticsPrivate * priv, int range,
  */
 static int
 set_percent_option(void *options, const char *optname,
-                   const int range, const int offset, const int default_value)
+                   const int span, const int offset, const int default_value)
 {
     int result;
     double percent = xf86CheckPercentOption(options, optname, -1);
 
     if (percent >= 0.0) {
         percent = xf86SetPercentOption(options, optname, -1);
-        result = percent / 100.0 * range + offset;
+        result = percent / 100.0 * span + offset;
     } else
         result = xf86SetIntOption(options, optname, default_value);
 
@@ -570,7 +570,7 @@ set_default_parameters(InputInfoPtr pInfo)
     Bool vertTwoFingerScroll, horizTwoFingerScroll;
     int horizResolution = 1;
     int vertResolution = 1;
-    int width, height, diag, range;
+    int width, height, diag, span;
     int horizHyst, vertHyst;
     int middle_button_timeout;
     int grab_event_device = 0;
@@ -603,21 +603,21 @@ set_default_parameters(InputInfoPtr pInfo)
     horizHyst = pars->hyst_x >= 0 ? pars->hyst_x : diag * 0.005;
     vertHyst = pars->hyst_y >= 0 ? pars->hyst_y : diag * 0.005;
 
-    range = priv->maxp - priv->minp + 1;
+    span = priv->maxp - priv->minp + 1;
 
-    calculate_tap_hysteresis(priv, range, &fingerLow, &fingerHigh);
+    calculate_tap_hysteresis(priv, span, &fingerLow, &fingerHigh);
 
     /* scaling based on defaults and a pressure of 256 */
-    emulateTwoFingerMinZ = priv->minp + range * (282.0 / 256);
-    pressureMotionMinZ = priv->minp + range * (30.0 / 256);
-    pressureMotionMaxZ = priv->minp + range * (160.0 / 256);
-    palmMinZ = priv->minp + range * (200.0 / 256);
+    emulateTwoFingerMinZ = priv->minp + span * (282.0 / 256);
+    pressureMotionMinZ = priv->minp + span * (30.0 / 256);
+    pressureMotionMaxZ = priv->minp + span * (160.0 / 256);
+    palmMinZ = priv->minp + span * (200.0 / 256);
 
-    range = priv->maxw - priv->minw + 1;
+    span = priv->maxw - priv->minw + 1;
 
     /* scaling based on defaults below and a tool width of 16 */
-    palmMinWidth = priv->minw + range * (10.0 / 16);
-    emulateTwoFingerMinW = priv->minw + range * (7.0 / 16);
+    palmMinWidth = priv->minw + span * (10.0 / 16);
+    emulateTwoFingerMinW = priv->minw + span * (7.0 / 16);
 
     /* Enable tap if we don't have a phys left button */
     tapButton1 = priv->has_left ? 0 : 1;
