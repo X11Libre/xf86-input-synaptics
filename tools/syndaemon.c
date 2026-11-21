@@ -186,14 +186,14 @@ install_signal_handler(void)
 }
 
 static enum KeyboardActivity
-keyboard_activity(Display * display)
+keyboard_activity(Display * dpy)
 {
     static unsigned char old_key_state[KEYMAP_SIZE];
     unsigned char key_state[KEYMAP_SIZE];
     int i;
     int ret = ActivityNone;
 
-    XQueryKeymap(display, (char *) key_state);
+    XQueryKeymap(dpy, (char *) key_state);
 
     for (i = 0; i < KEYMAP_SIZE; i++) {
         if ((key_state[i] & ~old_key_state[i]) & keyboard_mask[i]) {
@@ -227,16 +227,16 @@ get_time(void)
 }
 
 static void
-main_loop(Display * display, double idle_time, int poll_delay)
+main_loop(Display * dpy, double idle_time, int poll_delay)
 {
     double last_activity = 0.0;
     double current_time;
 
-    keyboard_activity(display);
+    keyboard_activity(dpy);
 
     for (;;) {
         current_time = get_time();
-        switch (keyboard_activity(display)) {
+        switch (keyboard_activity(dpy)) {
             case ActivityNew:
                 last_activity = current_time;
                 break;
@@ -274,7 +274,7 @@ clear_bit(unsigned char *ptr, int bit)
 }
 
 static void
-setup_keyboard_mask(Display * display, int ignore_modifier_keys)
+setup_keyboard_mask(Display * dpy, int ignore_mods)
 {
     XModifierKeymap *modifiers;
     int i;
@@ -282,8 +282,8 @@ setup_keyboard_mask(Display * display, int ignore_modifier_keys)
     for (i = 0; i < KEYMAP_SIZE; i++)
         keyboard_mask[i] = 0xff;
 
-    if (ignore_modifier_keys) {
-        modifiers = XGetModifierMapping(display);
+    if (ignore_mods) {
+        modifiers = XGetModifierMapping(dpy);
         for (i = 0; i < 8 * modifiers->max_keypermod; i++) {
             KeyCode kc = modifiers->modifiermap[i];
 
@@ -309,7 +309,7 @@ struct xrecord_callback_results {
 
 /* test if the xrecord extension is found */
 static Bool
-check_xrecord(Display * display)
+check_xrecord(Display * dpy)
 {
 
     Bool found;
@@ -317,11 +317,11 @@ check_xrecord(Display * display)
     int major_opcode, minor_opcode, first_error;
     int version[2];
 
-    found = XQueryExtension(display,
+    found = XQueryExtension(dpy,
                             "RECORD",
                             &major_opcode, &minor_opcode, &first_error);
 
-    status = XRecordQueryVersion(display, version, version + 1);
+    status = XRecordQueryVersion(dpy, version, version + 1);
     if (verbose && status) {
         printf("X RECORD extension version %d.%d\n", version[0], version[1]);
     }
@@ -404,7 +404,7 @@ is_modifier_pressed(const struct xrecord_callback_results *cbres)
 }
 
 static void
-record_main_loop(Display * display, double idle_time)
+record_main_loop(Display * dpy, double idle_time)
 {
 
     struct xrecord_callback_results cbres;
@@ -425,7 +425,7 @@ record_main_loop(Display * display, double idle_time)
     XRecordEnableContextAsync(dpy_data, context, xrecord_callback,
                               (XPointer) & cbres);
 
-    cbres.modifiers = XGetModifierMapping(display);
+    cbres.modifiers = XGetModifierMapping(dpy);
     /* clear list of modifiers */
     for (i = 0; i < MAX_MODIFIERS; ++i)
         cbres.pressed_modifiers[i] = 0;
@@ -503,7 +503,7 @@ record_main_loop(Display * display, double idle_time)
 static XDevice *
 dp_get_device(Display * dpy)
 {
-    XDevice *dev = NULL;
+    XDevice *device = NULL;
     XDeviceInfo *info = NULL;
     int ndevices = 0;
     Atom touchpad_type = 0;
@@ -517,15 +517,15 @@ dp_get_device(Display * dpy)
 
     while (ndevices--) {
         if (info[ndevices].type == touchpad_type) {
-            dev = XOpenDevice(dpy, info[ndevices].id);
-            if (!dev) {
+            device = XOpenDevice(dpy, info[ndevices].id);
+            if (!device) {
                 fprintf(stderr, "Failed to open device '%s'.\n",
                         info[ndevices].name);
                 error = 1;
                 goto unwind;
             }
 
-            properties = XListDeviceProperties(dpy, dev, &nprops);
+            properties = XListDeviceProperties(dpy, device, &nprops);
             if (!properties || !nprops) {
                 fprintf(stderr, "No properties on device '%s'.\n",
                         info[ndevices].name);
@@ -551,13 +551,13 @@ dp_get_device(Display * dpy)
  unwind:
     XFree(properties);
     XFreeDeviceList(info);
-    if (!dev)
+    if (!device)
         fprintf(stderr, "Unable to find a synaptics device.\n");
-    else if (error && dev) {
-        XCloseDevice(dpy, dev);
-        dev = NULL;
+    else if (error && device) {
+        XCloseDevice(dpy, device);
+        device = NULL;
     }
-    return dev;
+    return device;
 }
 
 int
